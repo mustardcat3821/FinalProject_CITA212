@@ -1,2 +1,0 @@
-# FinalProject_CITA212
-
