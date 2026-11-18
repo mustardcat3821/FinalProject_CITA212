@@ -5,10 +5,8 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 10f;
     [SerializeField] float jumpSpeed = 5f;
-    [SerializeField] float climbSpeed = 5f;
     [SerializeField] AudioClip deathSFX;
     [SerializeField] AudioClip jumpSFX;
-    [SerializeField] AudioClip shootSFX;
     [SerializeField] Vector2 deathKick = new Vector2(10f, 5f);
 
     bool isAlive = true;
