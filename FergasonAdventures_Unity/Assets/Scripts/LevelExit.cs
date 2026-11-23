@@ -6,10 +6,13 @@ public class LevelExit : MonoBehaviour
 {
     [SerializeField] float levelLoadDelay = 1f;
 
+    bool isLoading = false;
+
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) { return; }
+        if (!other.CompareTag("Player") || isLoading) { return; }
 
+        isLoading = true;
         StartCoroutine(LoadNextLevel());
     }
 
@@ -17,15 +20,33 @@ public class LevelExit : MonoBehaviour
     {
         yield return new WaitForSeconds(levelLoadDelay);
 
-        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        int nextSceneIndex = currentSceneIndex + 1;
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        string nextSceneName = "";
 
-        if (nextSceneIndex == SceneManager.sceneCountInBuildSettings)
+        if (currentSceneName.StartsWith("Level "))
         {
-            nextSceneIndex = 0;
+            string levelText = currentSceneName.Substring(6);
+
+            if (int.TryParse(levelText, out int levelNumber))
+            {
+                nextSceneName = "Level " + (levelNumber + 1);
+            }
         }
 
-        FindFirstObjectByType<ScenePersist>().ResetScenePersist();
-        SceneManager.LoadScene(nextSceneIndex);
+        if (Application.CanStreamedLevelBeLoaded(nextSceneName))
+        {
+            SceneManager.LoadScene(nextSceneName);
+        }
+        else
+        {
+            ScenePersist scenePersist = FindFirstObjectByType<ScenePersist>();
+
+            if (scenePersist != null)
+            {
+                scenePersist.ResetScenePersist();
+            }
+
+            SceneManager.LoadScene("End Screen");
+        }
     }
 }

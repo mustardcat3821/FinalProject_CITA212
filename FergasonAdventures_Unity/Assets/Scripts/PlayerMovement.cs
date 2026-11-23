@@ -1,36 +1,36 @@
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 10f;
+    [SerializeField] float moveSpeed = 5f;
     [SerializeField] float jumpSpeed = 5f;
+    [SerializeField] float groundPoundSpeed = 25f;
+    [SerializeField] float diveSpeed = 10f;
     [SerializeField] AudioClip deathSFX;
     [SerializeField] AudioClip jumpSFX;
-    [SerializeField] Vector2 deathKick = new Vector2(10f, 5f);
+    [SerializeField] Vector2 deathKick = new Vector2(0f, 5f);
 
     bool isAlive = true;
-    bool isGrounded = false;
+    bool isGroundPounding = false;
 
     Vector2 moveInput;
     Rigidbody2D myRigidBody;
     Animator myAnimator;
-    BoxCollider2D feetCollider;
-    CapsuleCollider2D myCapsuleCollider;
-    float gravityScaleAtStart;
+    CircleCollider2D feetCollider;
+    BoxCollider2D myBoxCollider;
 
     void Start()
     {
         myRigidBody = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
-        feetCollider = GetComponent<BoxCollider2D>();
-        myCapsuleCollider = GetComponent<CapsuleCollider2D>();
-        gravityScaleAtStart = myRigidBody.gravityScale;
+        feetCollider = GetComponent<CircleCollider2D>();
+        myBoxCollider = GetComponent<BoxCollider2D>();
     }
 
     void Update()
     {
+        CheckLanding();
         Run();
         FlipSprite();
     }
@@ -44,11 +44,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
         {
-            isGrounded = false;
             return;
         }
-
-        isGrounded = true;
 
         if (!isAlive)
         {
@@ -73,12 +70,34 @@ public class PlayerMovement : MonoBehaviour
         if (feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
         {
             myAnimator.SetBool("isRunning", hasHorizontalSpeed);
-            isGrounded = true;
+        }
+    }
+
+    public void OnSprint(InputValue value)
+    {
+        if (!isAlive) { return; }
+
+        if (value.isPressed)
+        {
+            moveSpeed = moveSpeed * 1.5f;
         }
         else
         {
-            isGrounded = false;
+            moveSpeed = moveSpeed / 1.5f;
         }
+    }
+
+    public void OnGroundPound(InputValue value)
+    {
+        if (!isAlive || isGroundPounding || !value.isPressed) { return; }
+
+        if (feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+        {
+            return;
+        }
+
+        isGroundPounding = true;
+        myRigidBody.linearVelocity = new Vector2(0f, -groundPoundSpeed);
     }
 
     void Jump()
@@ -87,8 +106,9 @@ public class PlayerMovement : MonoBehaviour
 
         Vector2 jumpVelocity = new Vector2(myRigidBody.linearVelocity.x, jumpSpeed);
         myRigidBody.linearVelocity = jumpVelocity;
-        AudioSource.PlayClipAtPoint(jumpSFX, myCapsuleCollider.transform.position);
-        myAnimator.SetTrigger("isJumping");
+
+        AudioSource.PlayClipAtPoint(jumpSFX, myBoxCollider.transform.position);
+        myAnimator.SetBool("isJumping", true);
     }
 
     void FlipSprite()
@@ -106,24 +126,39 @@ public class PlayerMovement : MonoBehaviour
         if (collision.collider.CompareTag("Enemy") ||
             collision.collider.CompareTag("Hazard"))
         {
-            isAlive = false;
-            myAnimator.SetTrigger("Dying");
-
-            AudioSource.PlayClipAtPoint(deathSFX, myCapsuleCollider.transform.position);
-
-            myRigidBody.linearVelocity = deathKick;
-            myCapsuleCollider.enabled = false;
-            feetCollider.enabled = false;
-
-            SpinDeadPlayer();
-            FindAnyObjectByType<GameSession>().ProcessPlayerDeath();
+            KillPlayer();
         }
     }
 
-    private void SpinDeadPlayer()
+    public void KillPlayer()
     {
         if (!isAlive) { return; }
-        myRigidBody.transform.rotation = Quaternion.Euler(0, 0, 360f);
+
+        isAlive = false;
+        isGroundPounding = false;
+
+        myAnimator.SetBool("isJumping", false);
+        myAnimator.SetBool("isRunning", false);
+        myAnimator.SetTrigger("Dying");
+
+        AudioSource.PlayClipAtPoint(deathSFX, myBoxCollider.transform.position);
+
+        myRigidBody.linearVelocity = deathKick;
+        myBoxCollider.enabled = false;
+        feetCollider.enabled = false;
+
+        FindAnyObjectByType<GameSession>().ProcessPlayerDeath();
     }
 
+    void CheckLanding()
+    {
+        if (!isAlive) { return; }
+
+        if (feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")) &&
+            myRigidBody.linearVelocity.y <= 0f)
+        {
+            isGroundPounding = false;
+            myAnimator.SetBool("isJumping", false);
+        }
+    }
 }

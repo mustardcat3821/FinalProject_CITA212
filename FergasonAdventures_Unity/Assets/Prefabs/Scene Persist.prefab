@@ -44,3 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2aead2ae8060e94eb0ae8ad596345d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScenePersist
+  destroyOnScenes:
+  - Game Over Screen
+  - Title Screen
+  - End Screen

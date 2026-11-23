@@ -6,14 +6,26 @@ using UnityEngine.SceneManagement;
 
 public class GameSession : MonoBehaviour
 {
+    [Serializable]
+    public class SceneTimer
+    {
+        public string sceneName;
+        public int timeLimit = 120;
+    }
+
     [SerializeField] int playerLives = 3;
     [SerializeField] int playerScore = 0;
+    [SerializeField] int timeLeft = 120;
+    [SerializeField] SceneTimer[] sceneTimers;
     [SerializeField] AudioClip gameSessionMusic;
 
     [SerializeField] TextMeshProUGUI livesText;
     [SerializeField] TextMeshProUGUI scoreText;
+    [SerializeField] TextMeshProUGUI timeText;
 
     AudioSource musicSource;
+    float currentTimeLeft;
+    bool isChangingScene = false;
 
     void Awake()
     {
@@ -29,6 +41,16 @@ public class GameSession : MonoBehaviour
         }
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
     void Start()
     {
         livesText.text = "Lives: " + playerLives.ToString();
@@ -37,10 +59,83 @@ public class GameSession : MonoBehaviour
         musicSource = GetComponent<AudioSource>();
         musicSource.clip = gameSessionMusic;
         musicSource.Play();
+
+        SetSceneTime(SceneManager.GetActiveScene().name);
+    }
+
+    void Update()
+    {
+        if (isChangingScene) { return; }
+
+        currentTimeLeft -= Time.deltaTime;
+        currentTimeLeft = Mathf.Max(currentTimeLeft, 0f);
+
+        timeText.text = "Time: " + Mathf.CeilToInt(currentTimeLeft).ToString();
+
+        if (currentTimeLeft <= 0f)
+        {
+            TimeRanOut();
+        }
+    }
+
+    void TimeRanOut()
+    {
+        PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
+
+        if (player != null)
+        {
+            player.KillPlayer();
+        }
+        else
+        {
+            ProcessPlayerDeath();
+        }
+    }
+
+    void SetSceneTime(string sceneName)
+    {
+        currentTimeLeft = timeLeft;
+
+        foreach (SceneTimer timer in sceneTimers)
+        {
+            if (timer.sceneName == sceneName)
+            {
+                currentTimeLeft = timer.timeLimit;
+                break;
+            }
+        }
+
+        timeText.text = "Time: " + Mathf.CeilToInt(currentTimeLeft).ToString();
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "End Screen")
+        {
+            if (musicSource != null)
+            {
+                musicSource.Stop();
+            }
+
+            Destroy(gameObject);
+            return;
+        }
+
+        if (scene.name == "Game Over Screen") { return; }
+
+        isChangingScene = false;
+        SetSceneTime(scene.name);
+
+        livesText.text = "Lives: " + playerLives.ToString();
+        scoreText.text = "Score: " + playerScore.ToString();
     }
 
     public void ProcessPlayerDeath()
     {
+        if (isChangingScene) { return; }
+
+        isChangingScene = true;
+
         if (playerLives >= 1)
         {
             TakeLife();
@@ -48,7 +143,7 @@ public class GameSession : MonoBehaviour
         else
         {
             musicSource.Stop();
-            StartCoroutine(WaitAndResetSession(2f));
+            StartCoroutine(WaitAndLoadGameOver(2f));
         }
     }
 
@@ -66,14 +161,6 @@ public class GameSession : MonoBehaviour
         livesText.text = "Lives: " + playerLives.ToString();
     }
 
-    private void ResetGameSession()
-    {
-        musicSource.Stop();
-        FindFirstObjectByType<ScenePersist>().ResetScenePersist();
-        SceneManager.LoadScene(0);
-        Destroy(gameObject);
-    }
-
     IEnumerator WaitAndReloadScene(float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
@@ -84,9 +171,12 @@ public class GameSession : MonoBehaviour
         musicSource.Play();
     }
 
-    IEnumerator WaitAndResetSession(float waitTime)
+    IEnumerator WaitAndLoadGameOver(float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
-        ResetGameSession();
+
+        musicSource.Stop();
+        SceneManager.LoadScene("Game Over Screen");
+        Destroy(gameObject);
     }
 }
