@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] Vector2 deathKick = new Vector2(10f, 5f);
 
     bool isAlive = true;
+    bool isGrounded = false;
 
     Vector2 moveInput;
     Rigidbody2D myRigidBody;
@@ -42,8 +44,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
         {
+            isGrounded = false;
             return;
         }
+
+        isGrounded = true;
 
         if (!isAlive)
         {
@@ -52,7 +57,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (value.isPressed)
         {
-            AudioSource.PlayClipAtPoint(jumpSFX, myCapsuleCollider.transform.position);
             Jump();
         }
     }
@@ -69,6 +73,11 @@ public class PlayerMovement : MonoBehaviour
         if (feetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
         {
             myAnimator.SetBool("isRunning", hasHorizontalSpeed);
+            isGrounded = true;
+        }
+        else
+        {
+            isGrounded = false;
         }
     }
 
@@ -78,6 +87,8 @@ public class PlayerMovement : MonoBehaviour
 
         Vector2 jumpVelocity = new Vector2(myRigidBody.linearVelocity.x, jumpSpeed);
         myRigidBody.linearVelocity = jumpVelocity;
+        AudioSource.PlayClipAtPoint(jumpSFX, myCapsuleCollider.transform.position);
+        myAnimator.SetTrigger("isJumping");
     }
 
     void FlipSprite()
@@ -104,7 +115,15 @@ public class PlayerMovement : MonoBehaviour
             myCapsuleCollider.enabled = false;
             feetCollider.enabled = false;
 
+            SpinDeadPlayer();
             FindAnyObjectByType<GameSession>().ProcessPlayerDeath();
         }
     }
+
+    private void SpinDeadPlayer()
+    {
+        if (!isAlive) { return; }
+        myRigidBody.transform.rotation = Quaternion.Euler(0, 0, 360f);
+    }
+
 }

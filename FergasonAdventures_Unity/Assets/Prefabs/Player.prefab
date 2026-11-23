@@ -36,8 +36,7 @@ Transform:
   m_LocalPosition: {x: -1.87152, y: 1.95513, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 7377438778733952113}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7515043766593627688
@@ -85,11 +84,11 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 690538195
-  m_SortingLayer: 6
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4801536866229146781, guid: 56c1f4e9ae4851b4ca66d5ff69bca638, type: 3}
+  m_Sprite: {fileID: 8066175906240929655, guid: 7c21118ab9b100d41a2620b797e332c8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -183,8 +182,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.030411303, y: -0.05617243}
-  m_Size: {x: 0.47692525, y: 0.8852738}
+  m_Offset: {x: -0.030411303, y: -0.13187093}
+  m_Size: {x: 0.47692525, y: 0.86422694}
   m_Direction: 0
 --- !u!114 &5057554199232825706
 MonoBehaviour:
@@ -230,13 +229,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 5
   jumpSpeed: 5
-  climbSpeed: 5
   deathSFX: {fileID: 8300000, guid: 6943f8e27d46cb64f88632e5e14fd4f1, type: 3}
   jumpSFX: {fileID: 8300000, guid: 11ab05db5dacdfe41827b1a64176a735, type: 3}
-  shootSFX: {fileID: 8300000, guid: b9797627f75a94b4187fce9026b1b586, type: 3}
   deathKick: {x: 5, y: 10}
-  bullet: {fileID: 18360845672913937, guid: 5c2318c9dd1b8f140a578edbec92f888, type: 3}
-  gun: {fileID: 7377438778733952113}
 --- !u!61 &2690311892742503985
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -271,17 +266,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.029629648, y: -0.50076735}
+  m_Offset: {x: -0.029629648, y: -0.57386905}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1.1525, y: 1.245}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.13406909, y: 0.023777008}
+  m_Size: {x: 0.13406909, y: 0.022015452}
   m_EdgeRadius: 0
 --- !u!82 &4390542068887271957
 AudioSource:
@@ -380,34 +375,3 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!1 &9028036970422576437
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7377438778733952113}
-  m_Layer: 0
-  m_Name: Gun
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7377438778733952113
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9028036970422576437}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.25, y: -0.25, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1996629468749832613}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
